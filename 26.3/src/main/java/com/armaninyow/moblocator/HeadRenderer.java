@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Vector3fc;
@@ -66,7 +67,7 @@ public class HeadRenderer {
 			if (uv == null || uv.length == 0) return null;
 
 			EntityRenderState state = mc.getEntityRenderDispatcher().extractEntity(entity, 1.0F);
-			Identifier tex = living.getTextureLocation(state);
+			Identifier tex = ((LivingEntityRenderer) living).getTextureLocation((LivingEntityRenderState) state);
 			return new Head(tex, uv[0], uv[1], uv[2], uv[3]);
 		} catch (Throwable t) {
 			UV_CACHE.putIfAbsent(entity.getType(), NONE);
