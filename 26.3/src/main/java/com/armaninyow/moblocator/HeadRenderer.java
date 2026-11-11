@@ -27,7 +27,7 @@ import java.util.Map;
 public class HeadRenderer {
 	// Virtual texture size: UVs in the model are normalised, so any big size gives exact sampling.
 	private static final int T = 8192;
-	private static final int[] SIZES = {3, 4, 6, 8}; // indexed by iconType
+	private static final int[] SIZES = {3, 4, 5, 6}; // indexed by iconType
 
 	private record Head(Identifier texture, float u0, float v0, float u1, float v1) {}
 
@@ -57,11 +57,16 @@ public class HeadRenderer {
 		try {
 			Minecraft mc = Minecraft.getInstance();
 			EntityRenderer renderer = mc.getEntityRenderDispatcher().getRenderer(entity);
-			if (!(renderer instanceof LivingEntityRenderer living)) return null;
+			if (!(renderer instanceof LivingEntityRenderer living)) {
+				if (UV_CACHE.putIfAbsent(entity.getType(), NONE) == null)
+					MobLocator.LOGGER.info("Not a living renderer: {}", entity.getType());
+				return null;
+			}
 
 			float[] uv = UV_CACHE.get(entity.getType());
 			if (uv == null) {
-				uv = findHeadUv(((Model) field(LivingEntityRenderer.class, "model").get(living)).root());
+				uv = findHeadUv(findModel(living).root());
+				if (uv == null) MobLocator.LOGGER.info("No head found for {}", entity.getType());
 				UV_CACHE.put(entity.getType(), uv == null ? NONE : uv);
 			}
 			if (uv == null || uv.length == 0) return null;
@@ -83,12 +88,15 @@ public class HeadRenderer {
 		if (part == null) part = find(root, false);
 		if (part == null) return null;
 
+		float best = Float.MAX_VALUE;
+		float[] uv = null;
 		for (Object cube : (List<Object>) field(ModelPart.class, "cubes").get(part)) {
 			Object polys = field(cube.getClass(), "polygons").get(cube);
 			for (int i = 0; i < Array.getLength(polys); i++) {
 				Object poly = Array.get(polys, i);
-				Vector3fc n = (Vector3fc) field(poly.getClass(), "normal").get(poly);
-				if (n.z() > -0.5f) continue; // front face looks toward -Z in model space
+				float nz = ((Vector3fc) field(poly.getClass(), "normal").get(poly)).z();
+				if (nz >= best) continue; // front face looks toward -Z in model space
+				best = nz;
 
 				float u0 = 2, v0 = 2, u1 = -1, v1 = -1;
 				Object verts = field(poly.getClass(), "vertices").get(poly);
@@ -99,10 +107,22 @@ public class HeadRenderer {
 					u0 = Math.min(u0, u); u1 = Math.max(u1, u);
 					v0 = Math.min(v0, w); v1 = Math.max(v1, w);
 				}
-				return new float[] {u0, v0, u1, v1};
+				uv = new float[] {u0, v0, u1, v1};
 			}
 		}
-		return null;
+		return uv;
+	}
+
+	private static Model findModel(Object renderer) throws Exception {
+		for (Class<?> k = renderer.getClass(); k != null; k = k.getSuperclass()) {
+			for (Field f : k.getDeclaredFields()) {
+				if (!Model.class.isAssignableFrom(f.getType())) continue;
+				f.setAccessible(true);
+				Object m = f.get(renderer);
+				if (m != null) return (Model) m;
+			}
+		}
+		throw new NoSuchFieldException("model");
 	}
 
 	@SuppressWarnings("unchecked")
