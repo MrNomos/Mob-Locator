@@ -213,7 +213,9 @@ public class MobLocator implements ClientModInitializer {
 			IconRenderer.drawArrow(context, x, y + 6, false, mobInfo.fillColor, mobInfo.outlineColor);
 		}
 
-		IconRenderer.drawIcon(context, x, y, mobInfo.iconType, mobInfo.fillColor, mobInfo.outlineColor);
+		if (!HeadRenderer.draw(context, mobInfo.entity, x, y, mobInfo.iconType, mobInfo.outlineColor | 0xFF000000)) {
+			IconRenderer.drawIcon(context, x, y, mobInfo.iconType, mobInfo.fillColor, mobInfo.outlineColor);
+		}
 	}
 
 	private float getHearingRange(LivingEntity entity) {
@@ -283,6 +285,7 @@ public class MobLocator implements ClientModInitializer {
 
 	private static class MobInfo {
 		double angle;
+		LivingEntity entity;
 		int iconType;
 		int fillColor;
 		int outlineColor;
@@ -291,6 +294,7 @@ public class MobLocator implements ClientModInitializer {
 
 		MobInfo(LivingEntity mob, Player player, int iconType,
 		        int fillColor, int outlineColor, boolean isAbove, boolean isBelow) {
+			this.entity       = mob;
 			this.iconType     = iconType;
 			this.fillColor    = fillColor;
 			this.outlineColor = outlineColor;
