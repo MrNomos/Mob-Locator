@@ -19,6 +19,9 @@ If you encounter bugs or wish to contribute:
 <details>
   <summary></summary>
    
+### 4.3.0—26.x
+* Added support for Minecraft 26.3
+* Updated Fabric Loader to 0.19.5 (required for 26.3)
 ### 4.2.0—26.x
 * Added support for Minecraft 26.2
 * Added Per-Mob Colors support for Sulfur Cube
