@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "moblocator",
+	"version": "${version}",
+	"name": "Mob Locator",
+	"description": "Shows mob locations on the XP bar",
+	"authors": [
+		"Armaninyow"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/mob-locator",
+		"sources": "https://github.com/armaninyow/Mob-Locator",
+		"issues": "https://github.com/armaninyow/Mob-Locator/discussions/categories/issues"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/moblocator/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			"com.armaninyow.moblocator.MobLocator"
+		],
+		"modmenu": [
+			"com.armaninyow.moblocator.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"moblocator.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"yet_another_config_lib_v3": "*",
+		"modmenu": "*"
+	}
+}
